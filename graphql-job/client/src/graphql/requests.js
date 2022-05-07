@@ -23,7 +23,7 @@ async function graphqlRequest(query, variables = {} ) {
 export async function loadJobs() {
     
     const query = ` 
-        {    
+        query {    
             jobs {
                 id
                 title
@@ -62,7 +62,7 @@ export async function loadJob(id) {
 
 export async function loadCompany(id) {
   const query = ` 
-      query ComanyQuery ($id: ID!) {
+      query CompanyQuery ($id: ID!) {
         company (id: $id) {
             id
             name
