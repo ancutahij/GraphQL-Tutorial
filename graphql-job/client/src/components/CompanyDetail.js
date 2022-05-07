@@ -2,7 +2,7 @@
 
 import { useParams } from 'react-router';
 import JobList from './JobList';
-import { loadCompany } from "../graphql/requests";
+import { loadCompany } from "../graphql/queries";
 import { useEffect, useState } from "react";
 
 function CompanyDetail() {

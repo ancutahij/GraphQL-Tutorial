@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import  JobList  from "./JobList";
-import { loadJobs } from "../graphql/requests";
+import { loadJobs } from "../graphql/queries";
 
 function JobBoard() {
   const [jobs, setJobs] = useState([]);
@@ -8,7 +8,10 @@ function JobBoard() {
   useEffect(() => {
     loadJobs()
       .then(setJobs)
-      .catch((err) => setError(true));
+      .catch((err) => {
+        setError(true);
+        console.error(err);
+      });
   }, []);
 
   if (error) {
