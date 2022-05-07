@@ -1,7 +1,13 @@
 type Query {
     company(id: ID!): Company
     job(id:ID!): Job
-    jobs: [Job]
+    jobs: [Job!]
+}
+
+type Mutation {
+    createJob(input: CreateJobInput!) : Job,
+    deleteJob(id: ID!) : Job,
+    updateJob(input: UpdateJobInput!): Job
 }
 
 type Company {
@@ -11,9 +17,22 @@ type Company {
     jobs: [Job]
 }
 
+#output type, used in queries
 type Job {
     id: ID!,
     title: String,
     company: Company,
     description: String
+}
+ 
+# only used as input arguments
+input CreateJobInput {
+    title: String!,
+    description: String   
+}
+
+input UpdateJobInput{
+  id: ID!
+  title: String!
+  description: String
 }

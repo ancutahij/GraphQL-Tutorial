@@ -1,45 +1,54 @@
-const fs = require('fs');
-const { ApolloServer, gql } = require('apollo-server-express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const express = require('express');
-const expressJwt = require('express-jwt');
-const jwt = require('jsonwebtoken');
-const db = require('./db');
+import { ApolloServer } from "apollo-server-express";
+import cors from "cors";
+import express from "express";
+import { expressjwt } from "express-jwt";
+import { readFile } from "fs/promises";
+import jwt from "jsonwebtoken";
+import { User } from "./db.js";
+import { resolvers } from "./resolvers.js";
 
-const port = 9000;
-const jwtSecret = Buffer.from('Zn8Q5tyZ/G1MHltc4F/gTkVJMlrbKiZt', 'base64');
+const PORT = 9000;
+const JWT_SECRET = Buffer.from("Zn8Q5tyZ/G1MHltc4F/gTkVJMlrbKiZt", "base64");
+
 
 const app = express();
-app.use(cors(), bodyParser.json(), expressJwt({
-  secret: jwtSecret,
-  credentialsRequired: false
-}));
+app.use(
+  cors(),
+  express.json(),
+  expressjwt({
+    algorithms: ["HS256"],
+    credentialsRequired: false,
+    secret: JWT_SECRET,
+  })
+);
 
-const typeDefs = gql(fs.readFileSync('./schema.graphql', { encoding: 'utf8' }));
-const resolvers = require('./resolvers');
-// const apolloServer = new ApolloServer({ typeDefs, resolvers });
-// apolloServer.applyMiddleware({ app, path: '/graphql' });
-let apolloServer = null;
-async function startServer() {
-  apolloServer = new ApolloServer({
-    typeDefs,
-    resolvers,
-  });
-  await apolloServer.start();
-  apolloServer.applyMiddleware({ app, path: "/graphql" });
-}
-startServer();
-
-app.post('/login', (req, res) => {
-  const {email, password} = req.body;
-  const user = db.users.list().find((user) => user.email === email);
-  if (!(user && user.password === password)) {
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne((user) => user.email === email);
+  if (user && user.password === password) {
+    const token = jwt.sign({ sub: user.id }, JWT_SECRET);
+    res.json({ token });
+  } else {
     res.sendStatus(401);
-    return;
   }
-  const token = jwt.sign({sub: user.id}, jwtSecret);
-  res.send({token});
 });
 
-app.listen(port, () => console.info(`Server started on port ${port}`));
+const typeDefs = await readFile("./schema.graphql", "utf-8");
+
+const context = async ({ req }) => {
+  console.log("req" + req);
+  if (req.auth) {
+    const user = await User.findById(req.auth.sub);
+    return { user };
+  }
+  return {};
+};
+
+const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
+await apolloServer.start();
+apolloServer.applyMiddleware({ app, path: "/graphql" });
+
+app.listen({ port: PORT }, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
+});

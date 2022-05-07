@@ -1,9 +1,7 @@
-const { DataStore } = require('notarealdb');
+import { Database } from "fakebase";
 
-const store = new DataStore('./data');
+const db = new Database("./data");
 
-module.exports = {
-  companies: store.collection('companies'),
-  jobs: store.collection('jobs'),
-  users: store.collection('users')
-};
+export const Company = db.table("companies");
+export const Job = db.table("jobs");
+export const User = db.table("users");
