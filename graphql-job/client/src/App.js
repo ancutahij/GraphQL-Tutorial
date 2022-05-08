@@ -9,7 +9,7 @@ import JobBoard from "./components/JobBoard";
 import JobDetail from "./components/JobDetail";
 import JobForm from "./components/JobForm";
 import NavBar from "./components/NavBar";
-// import { client } from "./graphql/queries";
+import { client } from "./graphql/queries";
 
 function App() {
   const navigate = useNavigate();
@@ -26,8 +26,7 @@ function App() {
   };
 
   return (
-    // <ApolloProvider client={client}>
-    <>
+    <ApolloProvider client={client}>
       <NavBar loggedIn={loggedIn} onLogout={handleLogout} />
       <main className="section">
         <Routes>
@@ -42,8 +41,7 @@ function App() {
           />
         </Routes>
       </main>
-      </>
-    // </ApolloProvider>
+    </ApolloProvider>
   );
 }
 
